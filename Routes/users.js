@@ -10,7 +10,6 @@ router.post('/', (req, res) => {
     return res.send({message: "tudo ok com o metodo post de usuarios"});
 })
 
-
 router.post('/create', (req, res) => {
     return res.send({message: "seu usario foi criado"});
 })
