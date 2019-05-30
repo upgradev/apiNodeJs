@@ -1,3 +1,7 @@
 install
 npm install express
-npm install nodemon -> for listener your api
+npm install --save nodemon -> for listener your api
+                    mongoose -> connection db
+                    body-parser -> paser body for json
+                    bcrypt -> cript of password
+
