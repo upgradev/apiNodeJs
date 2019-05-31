@@ -4,50 +4,59 @@ const router = express.Router();
 const Users = require('../model/user');
 const bcrypt = require('bcrypt');
 
-router.get('/', (req, res) => {
+
+
+router.get('/', async (req, res) => {
     //return res.send({message: "tudo ok com o metodo get de usuario"});
-    Users.find({}, (err, data) => {
-        if(err) return res.send({error: 'Err in the find users' });
-        return res.send({data});
-    })
-})
-
-router.post('/create', (req, res) => {
-
-    const {email, password} = req.body;
-
-    if(!email || !password) return res.send({error: 'insufficient data'});
-
-    Users.findOne({ email},  (err, data) => {
-        if(err) return res.send({error: 'Erro find user!'})
-        if(data) return res.send({error: 'User exists'})
-
-        Users.create(req.body, (err, data) => {
-            if(err) return res.send({error: "error create user"});
-            data.password = undefined;
-            return res.send(data);
-        });
-    });
+    try {       
+        const users = await Users.find({})
+        return res.send(users);
+    } catch (error) {
+        return res.send({error: "error find users"})
+    }
 });
 
-router.post('/auth', (req, res) => {
+router.post('/create', async (req, res) => {
     const {email, password} = req.body;
+    
+    if(!email || !password) return res.send({error: 'insufficient data'});
+    
+    try {
+        console.log(req.body);
+        
+        if(await Users.findOne({email})) return res.send({error: "user exists"});
+        const user = await Users.create(req.body);
+        user.password = undefined;
+        return res.send(user);
 
+    } catch (error) {
+        return res.send({error: "Error create user: " + error});
+    }
+
+});
+
+
+router.post('/auth', async (req, res) => {
+
+    const {email, password} = req.body;
     if(!email || !password) return res.send({error: 'insufficient data'});
 
-    Users.findOne({email}, (err, data) => {
-        
-        if(err) return res.send({error: 'Error find user'})
+    try {
+        //get password compare the password with password in the database
+        const user  = await Users.findOne({email}).select('+password');
+        if(!user) return res.send({error: 'Error find user'})
 
-        if(!data) return res.send({error: 'User not exists'})
+        const pass_ok = await bcrypt.compare(password, user.password);
+        if(!pass_ok) return res.send({error: 'error authentication user'});
 
-        bcrypt.compare(password, data.password, (err, same) => {
-            if(!same) return res.send({error: 'error authentication user'})
-            data.password = undefined;
-            return res.send(data);
-        })
+        user.password = undefined;
+        return res.send(user);
 
-    }).select('+password');
-})
+    } catch (error) {
+        return res.send({error: "error authenticate"})
+    }
+
+});
+
 
 module.exports = router;

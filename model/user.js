@@ -11,16 +11,15 @@ const UserSchema = new Schema({
 
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', async function(next) {
     let user = this;
     //if not modified password
     if(!user.isModified('password')) return next();
 
     //else
-    bcrypt.hash(user.password, 10, (err, encrypted) => {
-        user.password = encrypted;
-        return next();
-    });
+    user.password = await bcrypt.hash(user.password, 10);
+    return next();
+
 
 });
 
