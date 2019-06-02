@@ -4,9 +4,10 @@ const app = express();
 
 const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
+const config = require('./config/config');
 
 //connection mongodb in my case mongoAtlas
-const url  = '';
+const url  = config.bd_string;
 
 //options of connection
 const options = {

@@ -1,9 +1,12 @@
 //router default
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth');
 
-router.get('/', (req, res) => {
-    return res.send({message: "tudo ok com o metodo get da raiz"});
+router.get('/', auth, (req, res) => {
+    console.log(res.locals.auth_data);
+    
+    return res.send({message: "Essa informação é muito importante usuarios não autorizados não deveriam recebe-las"});
 })
 
 router.post('/', (req, res) => {
